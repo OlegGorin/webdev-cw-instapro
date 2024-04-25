@@ -54,6 +54,17 @@ p {
   border: none;
 }
 
+.button-nonactive {
+  display: block;
+  padding: 10px 13px 13px;
+  font-size: 18px;
+  line-height: 22px;
+  border-radius: 5px;
+  background-color: #8591da;
+  color: #ffffff;
+  border: none;
+}
+
 .link-button {
   display: inline;
   border: 0;
@@ -89,6 +100,11 @@ p {
 
 .secondary-button:active {
   background-color: #d8d7ff;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
 }
 
 .input {

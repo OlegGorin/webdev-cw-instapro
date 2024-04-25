@@ -1,4 +1,10 @@
-import { getPosts } from "./api.js";
+import {
+  getPosts,
+  getUserPosts,
+  postPosts,
+  toggleLike,
+  deletePost,
+} from "./api.js";
 import { renderAddPostPageComponent } from "./components/add-post-page-component.js";
 import { renderAuthPageComponent } from "./components/auth-page-component.js";
 import {
@@ -18,6 +24,7 @@ import {
 
 export let user = getUserFromLocalStorage();
 export let page = null;
+export let id = null;
 export let posts = [];
 
 const getToken = () => {
@@ -29,6 +36,19 @@ export const logout = () => {
   user = null;
   removeUserFromLocalStorage();
   goToPage(POSTS_PAGE);
+};
+
+const getAPI = () => {
+  return getPosts({ token: getToken() })
+    .then((newPosts) => {
+      page = POSTS_PAGE;
+      posts = newPosts;
+      renderApp();
+    })
+    .catch((error) => {
+      console.error(error);
+      goToPage(POSTS_PAGE);
+    });
 };
 
 /**
@@ -53,24 +73,26 @@ export const goToPage = (newPage, data) => {
     if (newPage === POSTS_PAGE) {
       page = LOADING_PAGE;
       renderApp();
-
-      return getPosts({ token: getToken() })
-        .then((newPosts) => {
-          page = POSTS_PAGE;
-          posts = newPosts;
-          renderApp();
-        })
-        .catch((error) => {
-          console.error(error);
-          goToPage(POSTS_PAGE);
-        });
+      return getAPI();
     }
 
     if (newPage === USER_POSTS_PAGE) {
       // TODO: реализовать получение постов юзера из API
       console.log("Открываю страницу пользователя: ", data.userId);
-      page = USER_POSTS_PAGE;
-      posts = [];
+
+      id = data.userId;
+
+      return getUserPosts(id, { token: getToken() })
+        .then((newPosts) => {
+          page = USER_POSTS_PAGE;
+          posts = newPosts;
+          renderApp();
+        })
+        .catch((error) => {
+          console.error(error);
+          goToPage(USER_POSTS_PAGE);
+        });
+
       return renderApp();
     }
 
@@ -112,7 +134,19 @@ const renderApp = () => {
       onAddPostClick({ description, imageUrl }) {
         // TODO: реализовать добавление поста в API
         console.log("Добавляю пост...", { description, imageUrl });
-        goToPage(POSTS_PAGE);
+        postPosts({ token: getToken(), description, imageUrl })
+          .then(() => {
+            goToPage(POSTS_PAGE);
+          })
+          .catch((error) => {
+            if (error.message === "Сервер недоступен") {
+              alert("Сервер недоступен, попробуйте позже");
+              postPosts({ token: getToken(), description, imageUrl });
+            } else if (error.message === "Failed to fetch") {
+              alert("Неполадки интернета");
+              // renderApp();
+            }
+          });
       },
     });
   }
@@ -125,9 +159,67 @@ const renderApp = () => {
 
   if (page === USER_POSTS_PAGE) {
     // TODO: реализовать страницу фотографию пользвателя
-    appEl.innerHTML = "Здесь будет страница фотографий пользователя";
-    return;
+    // appEl.innerHTML = "Здесь будет страница фотографий пользователя";
+    // return;
+    return renderPostsPageComponent({
+      appEl,
+    });
   }
 };
 
 goToPage(POSTS_PAGE);
+
+export const likePost = (likeId, doLike, page) => {
+  const appEl = document.getElementById("app");
+  console.log(likeId, doLike);
+  toggleLike({ token: getToken() }, likeId, doLike)
+    .then(() => {
+      getPage(page)
+        .then((newPosts) => {
+          page = POSTS_PAGE;
+          posts = newPosts;
+          renderApp();
+        })
+        .catch((error) => {
+          console.error(error);
+          goToPage(POSTS_PAGE);
+        });
+    })
+    .catch((error) => {
+      alert(error.message);
+      goToPage(AUTH_PAGE);
+    });
+};
+
+const getPage = (page) => {
+  if (page === POSTS_PAGE) {
+    return getPosts({ token: getToken() });
+  } else {
+    return getUserPosts(id, { token: getToken() });
+  }
+};
+
+export const delPost = (delId, page) => {
+  const appEl = document.getElementById("app");
+  console.log(delId);
+  deletePost({ token: getToken() }, delId)
+  .then(() => {
+    getPage(page)
+      .then((newPosts) => {
+        page = POSTS_PAGE;
+        posts = newPosts;
+        renderApp();
+      })
+      .catch((error) => {
+        console.error(error);
+        if (error.message === "Сервер недоступен") {
+          alert("Сервер недоступен, попробуйте позже");
+        }
+        goToPage(POSTS_PAGE);
+      });
+  });
+  // .then((newPosts) => {
+  //   posts = newPosts;
+  //   getAPI();
+  // });
+};

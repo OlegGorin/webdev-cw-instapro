@@ -1,11 +1,31 @@
 // Замени на свой, чтобы получить независимый от других набор данных.
 // "боевая" версия инстапро лежит в ключе prod
-const personalKey = "prod";
+// const personalKey = "prod";
+const personalKey = "OlegGorin";
 const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 
 export function getPosts({ token }) {
   return fetch(postsHost, {
+    method: "GET",
+    headers: {
+      Authorization: token,
+    },
+  })
+    .then((response) => {
+      if (response.status === 401) {
+        throw new Error("Нет авторизации");
+      }
+
+      return response.json();
+    })
+    .then((data) => {
+      return data.posts;
+    });
+}
+
+export function getUserPosts(id, { token }) {
+  return fetch(`${postsHost}/user-posts/${id}`, {
     method: "GET",
     headers: {
       Authorization: token,
@@ -68,3 +88,57 @@ export function uploadImage({ file }) {
     return response.json();
   });
 }
+
+export const postPosts = ({ token, description, imageUrl }) => {
+  return fetch(postsHost, {
+    method: "POST",
+    body: JSON.stringify({
+      description,
+      imageUrl,
+    }),
+    headers: {
+      Authorization: token,
+    },
+  }).then((response) => {
+    if (response.status === 500) {
+      throw new Error("Сервер недоступен");
+    } else if (response.status === 400) {
+      throw new Error("Плохой запрос");
+    } else {
+      return response.json();
+    }
+  });
+};
+
+export const toggleLike = ({ token }, likeId, doLike) => {
+  console.log(likeId, doLike);
+  let path = `${postsHost}/${likeId}/${doLike}`;
+  console.log(path);
+  return fetch(`${postsHost}/${likeId}/${doLike}`, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+    },
+  }).then((response) => {
+    if (response.status === 200) {
+      return response.json();
+    } else {
+      throw new Error("Ставить лайки могут только авторизованные пользователи");
+    }
+  });
+};
+
+export function deletePost({ token }, id) {
+  return fetch(`${postsHost}/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: token,
+    },
+  }).then((response) => {
+    if (response.status === 200) {
+      return response.json();
+    } else if (response.status === 500) {
+      throw new Error("Сервер недоступен");
+    }
+  });
+};

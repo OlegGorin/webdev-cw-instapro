@@ -37,5 +37,9 @@ export function renderHeaderComponent({ element }) {
 
   element.querySelector(".logout-button")?.addEventListener("click", logout);
 
+  // element.querySelectorAll(".post-header").addEventListener("click", () => {
+  //   goToPage(USERS_POSTS_PAGE);
+  // });
+
   return element;
 }
