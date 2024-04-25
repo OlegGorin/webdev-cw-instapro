@@ -218,8 +218,4 @@ export const delPost = (delId, page) => {
         goToPage(POSTS_PAGE);
       });
   });
-  // .then((newPosts) => {
-  //   posts = newPosts;
-  //   getAPI();
-  // });
 };

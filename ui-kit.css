@@ -43,7 +43,8 @@ p {
 }
 
 .button,
-.secondary-button {
+.secondary-button,
+.button-nonactive {
   display: block;
   padding: 10px 13px 13px;
   font-size: 18px;
@@ -55,15 +56,10 @@ p {
 }
 
 .button-nonactive {
-  display: block;
-  padding: 10px 13px 13px;
-  font-size: 18px;
-  line-height: 22px;
-  border-radius: 5px;
-  background-color: #8591da;
-  color: #ffffff;
-  border: none;
+  background-color: #b9bec0;
 }
+
+.button-nonactive:disabled
 
 .link-button {
   display: inline;

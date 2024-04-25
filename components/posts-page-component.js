@@ -3,16 +3,13 @@ import { renderHeaderComponent } from "./header-component.js";
 import { posts, goToPage, page, likePost, id, delPost } from "../index.js";
 import { user } from "../index.js";
 import { formatDistance } from "date-fns";
-// // Require Russian locale
+// Require Russian locale
 import { ru } from "date-fns/locale";
 
 export function renderPostsPageComponent({ appEl }) {
   // TODO: реализовать рендер постов из api
   console.log("Актуальный список постов:", posts);
-  if (user) {
-    console.log(user, user._id);
-  }
-
+  
   let postsHTML = posts
     .map((post) => {
       return `
@@ -89,10 +86,6 @@ export function renderPostsPageComponent({ appEl }) {
     .join("");
 
   console.log(posts);
-
-  // ${formatDistance(new Date(), new Date(post.createdAt), {
-  //           locale: ru,
-  //         })} назад
 
   let userPosts = posts.map((post) => post);
 
