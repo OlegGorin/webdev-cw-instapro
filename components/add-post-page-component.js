@@ -2,6 +2,7 @@ import { POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { posts, goToPage } from "../index.js";
 import { renderUploadImageComponent } from "./upload-image-component.js";
+import { sanitize } from "../helpers.js";
 
 let imageUrl = "";
 
@@ -54,7 +55,7 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
       }
 
       onAddPostClick({
-        description: document.querySelector(".input").value.trim(),
+        description: sanitize(document.querySelector(".input").value.trim()),
         imageUrl: imageUrl,
       });
     });

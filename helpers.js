@@ -28,3 +28,11 @@ export const formatDate = (date) => {
     })
   );
 };
+
+export const sanitize = (string) => {
+  return string
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+};
