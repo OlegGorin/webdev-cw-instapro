@@ -112,8 +112,6 @@ export const postPosts = ({ token, description, imageUrl }) => {
 
 export const toggleLike = ({ token }, likeId, doLike) => {
   console.log(likeId, doLike);
-  let path = `${postsHost}/${likeId}/${doLike}`;
-  console.log(path);
   return fetch(`${postsHost}/${likeId}/${doLike}`, {
     method: "POST",
     headers: {
