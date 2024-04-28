@@ -1,10 +1,12 @@
 import { POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage } from "../index.js";
+// import { posts, goToPage } from "../index.js";
+import { goToPage } from "../index.js";
 import { renderUploadImageComponent } from "./upload-image-component.js";
 import { sanitize } from "../helpers.js";
 
-export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
+// export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
+export function renderAddPostPageComponent({ appEl, posts, onAddPostClick }) {
   let imageUrl = "";
   const render = () => {
     // TODO: Реализовать страницу добавления поста

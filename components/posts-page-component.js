@@ -1,17 +1,17 @@
 import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage, page, id } from "../index.js";
-import { likePost, delPost } from "./toggle-del-posts-components.js"
-import { sanitize } from "../helpers.js"
-import { user } from "../index.js";
+import { goToPage, page, id, user } from "../index.js";
+import { likePost, delPost } from "./toggle-del-posts-components.js";
+import { sanitize } from "../helpers.js";
 import { formatDistance } from "date-fns";
 // Require Russian locale
 import { ru } from "date-fns/locale";
 
-export function renderPostsPageComponent({ appEl }) {
+// export function renderPostsPageComponent({ appEl }) {
+export function renderPostsPageComponent({ appEl, posts }) {
   // TODO: реализовать рендер постов из api
   console.log("Актуальный список постов:", posts);
-  
+
   let postsHTML = posts
     .map((post) => {
       return `
@@ -46,8 +46,8 @@ export function renderPostsPageComponent({ appEl }) {
                 post.likes.length === 0
                   ? 0
                   : post.likes.length === 1
-                  ? post.likes[0].name
-                  : post.likes[post.likes.length - 1].name +
+                  ? sanitize(post.likes[0].name)
+                  : sanitize(post.likes[post.likes.length - 1].name) +
                     " и ещё " +
                     (post.likes.length - 1)
               }
@@ -84,6 +84,8 @@ export function renderPostsPageComponent({ appEl }) {
         </li>`;
     })
     .join("");
+
+  
 
   console.log(posts);
 
@@ -134,57 +136,61 @@ export function renderPostsPageComponent({ appEl }) {
   for (let like of document.querySelectorAll(".like-button")) {
     like.addEventListener("click", (event) => {
       event.stopPropagation();
-      console.log(like.dataset);
-      let likeId = like.dataset.postId;
-      let likeIsLiked = like.dataset.postLiked;
-      let doLike = "";
-      if (likeIsLiked === "false") {
-        doLike = "like";
+      if (user) {
+        let likeId = like.dataset.postId;
+        let likeIsLiked = like.dataset.postLiked;
+        let doLike = "";
+        if (likeIsLiked === "false") {
+          doLike = "like";
+        } else {
+          doLike = "dislike";
+        }
+        likePost({ likeId, doLike, page, posts });
       } else {
-        doLike = "dislike";
+        alert("Ставить лайки могут только авторизованные пользователи");
       }
-      console.log(likeId, doLike);
-      likePost(likeId, doLike, page);
     });
   }
 
   for (let del of document.querySelectorAll(".button")) {
     del.addEventListener("click", (event) => {
       event.stopPropagation();
-      console.log(del.dataset);
       let delId = del.dataset.id;
-      delPost(delId, page);
+      delPost({ delId, page, posts });
     });
   }
+
+  return posts;
 }
 
 const btnUp = {
-  el: document.querySelector('.btn-up'),
+  el: document.querySelector(".btn-up"),
   show() {
     // удалим у кнопки класс btn-up_hide
-    this.el.classList.remove('btn-up_hide');
+    this.el.classList.remove("btn-up_hide");
   },
   hide() {
     // добавим к кнопке класс btn-up_hide
-    this.el.classList.add('btn-up_hide');
+    this.el.classList.add("btn-up_hide");
   },
   addEventListener() {
     // при прокрутке содержимого страницы
-    window.addEventListener('scroll', () => {
+    window.addEventListener("scroll", () => {
       // определяем величину прокрутки
       const scrollY = window.scrollY || document.documentElement.scrollTop;
       // если страница прокручена больше чем на 400px, то делаем кнопку видимой, иначе скрываем
       scrollY > 400 ? this.show() : this.hide();
     });
     // при нажатии на кнопку .btn-up
-    document.querySelector('.btn-up').onclick = () => {
+    document.querySelector(".btn-up").onclick = () => {
       // переместим в начало страницы
       window.scrollTo({
         top: 0,
         left: 0,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
-    }
-  }
-}
+    };
+  },
+};
+
 btnUp.addEventListener();

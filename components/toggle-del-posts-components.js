@@ -1,35 +1,9 @@
-import {
-  getPosts,
-  getUserPosts,
-  toggleLike,
-  deletePost,
-} from "../api.js";
+import { getPosts, getUserPosts, toggleLike, deletePost } from "../api.js";
 import { AUTH_PAGE, POSTS_PAGE } from "../routes.js";
-import { getToken, goToPage, posts, renderApp } from "../index.js";
+// import { posts, getToken, goToPage, renderApp, id } from "../index.js";
+import { getToken, goToPage, renderApp, id } from "../index.js";
 
-export const likePost = (likeId, doLike, page) => {
-  const appEl = document.getElementById("app");
-  console.log(likeId, doLike);
-  toggleLike({ token: getToken() }, likeId, doLike)
-    .then(() => {
-      getPage(page)
-        .then((newPosts) => {
-          page = POSTS_PAGE;
-          posts = newPosts;
-          renderApp();
-        })
-        .catch((error) => {
-          console.error(error);
-          goToPage(POSTS_PAGE);
-        });
-    })
-    .catch((error) => {
-      alert(error.message);
-      goToPage(AUTH_PAGE);
-    });
-};
-
-const getPage = (page) => {
+function getPage(page) {
   if (page === POSTS_PAGE) {
     return getPosts({ token: getToken() });
   } else {
@@ -37,15 +11,30 @@ const getPage = (page) => {
   }
 };
 
-export const delPost = (delId, page) => {
-  const appEl = document.getElementById("app");
-  console.log(delId);
+// export function likePost(likeId, doLike, page) {
+export function likePost({ likeId, doLike, page, posts }) {
+  toggleLike({ token: getToken() }, likeId, doLike)
+    .then(() => {
+      getPage(page).then((newPosts) => {
+        page = POSTS_PAGE;
+        posts = newPosts;
+        renderApp({ posts });
+      });
+    })
+    .catch((error) => {
+      alert(error.message);
+      goToPage(AUTH_PAGE);
+    });
+};
+
+// export function delPost(delId, page) {
+export function delPost({ delId, page, posts }) {
   deletePost({ token: getToken() }, delId).then(() => {
     getPage(page)
       .then((newPosts) => {
         page = POSTS_PAGE;
         posts = newPosts;
-        renderApp();
+        renderApp({ posts });
       })
       .catch((error) => {
         console.error(error);
