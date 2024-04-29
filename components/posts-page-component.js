@@ -1,7 +1,7 @@
 import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { goToPage, page, id, user } from "../index.js";
-import { likePost, delPost } from "./toggle-del-posts-components.js";
+import { likePost, delPost } from "../toggledel.js";
 import { sanitize } from "../helpers.js";
 import { formatDistance } from "date-fns";
 // Require Russian locale
@@ -84,8 +84,6 @@ export function renderPostsPageComponent({ appEl, posts }) {
         </li>`;
     })
     .join("");
-
-  
 
   console.log(posts);
 
