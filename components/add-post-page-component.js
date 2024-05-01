@@ -58,10 +58,15 @@ export function renderAddPostPageComponent({ appEl, posts, onAddPostClick }) {
         return;
       }
 
-      onAddPostClick({
-        description: sanitize(document.querySelector(".input").value.trim()),
-        imageUrl: imageUrl,
-      });
+      if (imageUrl.trim() === "") {
+        alert("Выберите фото. Поле имени файла фото не должно быть пустым");
+        return;
+      } else {
+        onAddPostClick({
+          description: sanitize(document.querySelector(".input").value.trim()),
+          imageUrl: imageUrl,
+        });
+      }
     });
   };
 
