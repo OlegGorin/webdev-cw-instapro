@@ -1,99 +1,123 @@
 import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage } from "../index.js";
+import { goToPage, page, id, user } from "../index.js";
+import { likePost, delPost } from "../toggledel.js";
+import { sanitize } from "../helpers.js";
+import { formatDistance } from "date-fns";
+// Require Russian locale
+import { ru } from "date-fns/locale";
 
-export function renderPostsPageComponent({ appEl }) {
+// export function renderPostsPageComponent({ appEl }) {
+export function renderPostsPageComponent({ appEl, posts }) {
   // TODO: реализовать рендер постов из api
   console.log("Актуальный список постов:", posts);
+
+  let postsHTML = posts
+    .map((post) => {
+      return `
+        <li class="post">
+        ${
+          page != USER_POSTS_PAGE
+            ? `<div class="post-header" data-user-id=${post.user.id}>
+            <img src=${post.user.imageUrl} class="post-header__user-image">
+            <p class="post-header__user-name">${sanitize(post.user.name)}</p>
+          </div>`
+            : ""
+        }
+          <div class="post-image-container">
+            <img class="post-image" src=${post.imageUrl}>
+          </div>
+          <div class="post-likes">
+            <button data-post-id=${post.id} data-post-liked="${
+        post.isLiked
+      }" class="like-button">
+
+            ${
+              post.isLiked
+                ? `<img src="./assets/images/like-active.svg"></img>`
+                : `<img src="./assets/images/like-not-active.svg"></img>`
+            }
+
+            </button>
+            <p class="post-likes-text">
+              Нравится: <strong>
+
+              ${
+                post.likes.length === 0
+                  ? 0
+                  : post.likes.length === 1
+                  ? sanitize(post.likes[0].name)
+                  : sanitize(post.likes[post.likes.length - 1].name) +
+                    " и ещё " +
+                    (post.likes.length - 1)
+              }
+
+              </strong>
+            </p>
+           </div>
+           <div class="footer">
+            <div>
+              <p class="post-text">
+                <span class="user-name">            
+                ${sanitize(post.user.name)}
+                </span>
+                ${post.description}
+              </p>
+              <p class="post-date">
+                ${formatDistance(new Date(), new Date(post.createdAt), {
+                  locale: ru,
+                })} назад
+              </p>
+            </div>  
+            <div>
+            ${
+              user
+                ? user._id === post.user.id
+                  ? `<button data-id=${post.id} class="button">
+                <div title="Удалить пост"></div>
+                Удалить</button>`
+                  : ""
+                : ""
+            }
+            </div>
+          </div>
+        </li>`;
+    })
+    .join("");
+
+  console.log(posts);
+
+  let userPosts = posts.map((post) => post);
+
+  let idUser = userPosts[0].user.id;
+  let nameUser = userPosts[0].user.name;
+  let imageUser = userPosts[0].user.imageUrl;
+
+  const appHtml = `
+    <div class="page-container">
+      <div class="header-container"></div>
+      <ul class="posts">
+      <li class="post">
+      ${
+        page === USER_POSTS_PAGE
+          ? `<div class="posts-user-header" data-user-id=${idUser}>
+          <img src=${imageUser} class="posts-user-header__user-image">
+          <p class="posts-user-header__user-name">${sanitize(nameUser)}</p>
+        </div>`
+          : ""
+      }
+
+        ${postsHTML}
+        </li>
+      </ul>
+    </div>`;
+
+  appEl.innerHTML = appHtml;
 
   /**
    * TODO: чтобы отформатировать дату создания поста в виде "19 минут назад"
    * можно использовать https://date-fns.org/v2.29.3/docs/formatDistanceToNow
    */
-  const appHtml = `
-              <div class="page-container">
-                <div class="header-container"></div>
-                <ul class="posts">
-                  <li class="post">
-                    <div class="post-header" data-user-id="642d00329b190443860c2f31">
-                        <img src="https://www.imgonline.com.ua/examples/bee-on-daisy.jpg" class="post-header__user-image">
-                        <p class="post-header__user-name">Иван Иваныч</p>
-                    </div>
-                    <div class="post-image-container">
-                      <img class="post-image" src="https://www.imgonline.com.ua/examples/bee-on-daisy.jpg">
-                    </div>
-                    <div class="post-likes">
-                      <button data-post-id="642d00579b190443860c2f32" class="like-button">
-                        <img src="./assets/images/like-active.svg">
-                      </button>
-                      <p class="post-likes-text">
-                        Нравится: <strong>2</strong>
-                      </p>
-                    </div>
-                    <p class="post-text">
-                      <span class="user-name">Иван Иваныч</span>
-                      Ромашка, ромашка...
-                    </p>
-                    <p class="post-date">
-                      19 минут назад
-                    </p>
-                  </li>
-                  <li class="post">
-                    <div class="post-header" data-user-id="6425602ce156b600f7858df2">
-                        <img src="https://storage.yandexcloud.net/skypro-webdev-homework-bucket/1680601502867-%25C3%2590%25C2%25A1%25C3%2590%25C2%25BD%25C3%2590%25C2%25B8%25C3%2590%25C2%25BC%25C3%2590%25C2%25BE%25C3%2590%25C2%25BA%2520%25C3%2591%25C2%258D%25C3%2590%25C2%25BA%25C3%2591%25C2%2580%25C3%2590%25C2%25B0%25C3%2590%25C2%25BD%25C3%2590%25C2%25B0%25202023-04-04%2520%25C3%2590%25C2%25B2%252014.04.29.png" class="post-header__user-image">
-                        <p class="post-header__user-name">Варварва Н.</p>
-                    </div>
-                  
-                    
-                    <div class="post-image-container">
-                      <img class="post-image" src="https://storage.yandexcloud.net/skypro-webdev-homework-bucket/1680670675451-%25C3%2590%25C2%25A1%25C3%2590%25C2%25BD%25C3%2590%25C2%25B8%25C3%2590%25C2%25BC%25C3%2590%25C2%25BE%25C3%2590%25C2%25BA%2520%25C3%2591%25C2%258D%25C3%2590%25C2%25BA%25C3%2591%25C2%2580%25C3%2590%25C2%25B0%25C3%2590%25C2%25BD%25C3%2590%25C2%25B0%25202023-03-31%2520%25C3%2590%25C2%25B2%252012.51.20.png">
-                    </div>
-                    <div class="post-likes">
-                      <button data-post-id="642cffed9b190443860c2f30" class="like-button">
-                        <img src="./assets/images/like-not-active.svg">
-                      </button>
-                      <p class="post-likes-text">
-                        Нравится: <strong>35</strong>
-                      </p>
-                    </div>
-                    <p class="post-text">
-                      <span class="user-name">Варварва Н.</span>
-                      Нарисовала картину, посмотрите какая красивая
-                    </p>
-                    <p class="post-date">
-                      3 часа назад
-                    </p>
-                  </li>
-                  <li class="post">
-                    <div class="post-header" data-user-id="6425602ce156b600f7858df2">
-                        <img src="https://storage.yandexcloud.net/skypro-webdev-homework-bucket/1680601502867-%25C3%2590%25C2%25A1%25C3%2590%25C2%25BD%25C3%2590%25C2%25B8%25C3%2590%25C2%25BC%25C3%2590%25C2%25BE%25C3%2590%25C2%25BA%2520%25C3%2591%25C2%258D%25C3%2590%25C2%25BA%25C3%2591%25C2%2580%25C3%2590%25C2%25B0%25C3%2590%25C2%25BD%25C3%2590%25C2%25B0%25202023-04-04%2520%25C3%2590%25C2%25B2%252014.04.29.png" class="post-header__user-image">
-                        <p class="post-header__user-name">Варварва Н.</p>
-                    </div>
-                  
-                    
-                    <div class="post-image-container">
-                      <img class="post-image" src="https://leonardo.osnova.io/97a160ca-76b6-5cba-87c6-84ef29136bb3/">
-                    </div>
-                    <div class="post-likes">
-                      <button data-post-id="642cf82e9b190443860c2f2b" class="like-button">
-                        <img src="./assets/images/like-not-active.svg">
-                      </button>
-                      <p class="post-likes-text">
-                        Нравится: <strong>0</strong>
-                      </p>
-                    </div>
-                    <p class="post-text">
-                      <span class="user-name">Варварва Н.</span>
-                      Голова
-                    </p>
-                    <p class="post-date">
-                      8 дней назад
-                    </p>
-                  </li>
-                </ul>
-              </div>`;
-
-  appEl.innerHTML = appHtml;
 
   renderHeaderComponent({
     element: document.querySelector(".header-container"),
@@ -106,4 +130,65 @@ export function renderPostsPageComponent({ appEl }) {
       });
     });
   }
+
+  for (let like of document.querySelectorAll(".like-button")) {
+    like.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (user) {
+        let likeId = like.dataset.postId;
+        let likeIsLiked = like.dataset.postLiked;
+        let doLike = "";
+        if (likeIsLiked === "false") {
+          doLike = "like";
+        } else {
+          doLike = "dislike";
+        }
+        likePost({ likeId, doLike, page, posts });
+      } else {
+        alert("Ставить лайки могут только авторизованные пользователи");
+      }
+    });
+  }
+
+  for (let del of document.querySelectorAll(".button")) {
+    del.addEventListener("click", (event) => {
+      event.stopPropagation();
+      let delId = del.dataset.id;
+      delPost({ delId, page, posts });
+    });
+  }
+
+  return posts;
 }
+
+const btnUp = {
+  el: document.querySelector(".btn-up"),
+  show() {
+    // удалим у кнопки класс btn-up_hide
+    this.el.classList.remove("btn-up_hide");
+  },
+  hide() {
+    // добавим к кнопке класс btn-up_hide
+    this.el.classList.add("btn-up_hide");
+  },
+  addEventListener() {
+    // при прокрутке содержимого страницы
+    window.addEventListener("scroll", () => {
+      // определяем величину прокрутки
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      // если страница прокручена больше чем на 400px, то делаем кнопку видимой, иначе скрываем
+      scrollY > 400 ? this.show() : this.hide();
+    });
+    // при нажатии на кнопку .btn-up
+    document.querySelector(".btn-up").onclick = () => {
+      // переместим в начало страницы
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+    };
+  },
+};
+
+btnUp.addEventListener();

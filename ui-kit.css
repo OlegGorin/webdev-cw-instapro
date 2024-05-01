@@ -91,6 +91,11 @@ p {
   background-color: #d8d7ff;
 }
 
+.footer {
+  display: flex;
+  justify-content: space-between;
+}
+
 .input {
   height: 36px;
   box-sizing: border-box;
